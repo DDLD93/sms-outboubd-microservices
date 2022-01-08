@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/ddld93/sms-outboubd-microservices/controller"
-	"github.com/ddld93/sms-outboubd-microservices/model"
+	"github.com/ddld93/sms-outboubd-microservices/server/controller"
+	"github.com/ddld93/sms-outboubd-microservices/server/model"
 )
 
 type SMSRoute struct{

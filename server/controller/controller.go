@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ddld93/sms-outboubd-microservices/model"
+	"github.com/ddld93/sms-outboubd-microservices/server/model"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )

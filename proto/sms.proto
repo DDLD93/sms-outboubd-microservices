@@ -5,7 +5,7 @@ option go_package="./smspb";
 service SMSServiceApi{
     rpc send(SendSMSRequest) returns (SendSMSResponse){}
     rpc getOne(GetSMSRequest) returns (GetSMSResponse){}
-    rpc getAll(GetSMSRequest) returns ( GetSMSResponse){}
+    rpc getAll(GetSMSRequest) returns ( stream GetSMSResponse){}
 }
 
 

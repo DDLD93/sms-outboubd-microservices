@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type SMSServiceApiClient interface {
 	Send(ctx context.Context, in *SendSMSRequest, opts ...grpc.CallOption) (*SendSMSResponse, error)
 	GetOne(ctx context.Context, in *GetSMSRequest, opts ...grpc.CallOption) (*GetSMSResponse, error)
-	GetAll(ctx context.Context, in *GetSMSRequest, opts ...grpc.CallOption) (*GetSMSResponse, error)
+	GetAll(ctx context.Context, in *GetSMSRequest, opts ...grpc.CallOption) (SMSServiceApi_GetAllClient, error)
 }
 
 type sMSServiceApiClient struct {
@@ -49,13 +49,36 @@ func (c *sMSServiceApiClient) GetOne(ctx context.Context, in *GetSMSRequest, opt
 	return out, nil
 }
 
-func (c *sMSServiceApiClient) GetAll(ctx context.Context, in *GetSMSRequest, opts ...grpc.CallOption) (*GetSMSResponse, error) {
-	out := new(GetSMSResponse)
-	err := c.cc.Invoke(ctx, "/main.SMSServiceApi/getAll", in, out, opts...)
+func (c *sMSServiceApiClient) GetAll(ctx context.Context, in *GetSMSRequest, opts ...grpc.CallOption) (SMSServiceApi_GetAllClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SMSServiceApi_ServiceDesc.Streams[0], "/main.SMSServiceApi/getAll", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &sMSServiceApiGetAllClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type SMSServiceApi_GetAllClient interface {
+	Recv() (*GetSMSResponse, error)
+	grpc.ClientStream
+}
+
+type sMSServiceApiGetAllClient struct {
+	grpc.ClientStream
+}
+
+func (x *sMSServiceApiGetAllClient) Recv() (*GetSMSResponse, error) {
+	m := new(GetSMSResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // SMSServiceApiServer is the server API for SMSServiceApi service.
@@ -64,7 +87,7 @@ func (c *sMSServiceApiClient) GetAll(ctx context.Context, in *GetSMSRequest, opt
 type SMSServiceApiServer interface {
 	Send(context.Context, *SendSMSRequest) (*SendSMSResponse, error)
 	GetOne(context.Context, *GetSMSRequest) (*GetSMSResponse, error)
-	GetAll(context.Context, *GetSMSRequest) (*GetSMSResponse, error)
+	GetAll(*GetSMSRequest, SMSServiceApi_GetAllServer) error
 	mustEmbedUnimplementedSMSServiceApiServer()
 }
 
@@ -78,8 +101,8 @@ func (UnimplementedSMSServiceApiServer) Send(context.Context, *SendSMSRequest) (
 func (UnimplementedSMSServiceApiServer) GetOne(context.Context, *GetSMSRequest) (*GetSMSResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOne not implemented")
 }
-func (UnimplementedSMSServiceApiServer) GetAll(context.Context, *GetSMSRequest) (*GetSMSResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
+func (UnimplementedSMSServiceApiServer) GetAll(*GetSMSRequest, SMSServiceApi_GetAllServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
 func (UnimplementedSMSServiceApiServer) mustEmbedUnimplementedSMSServiceApiServer() {}
 
@@ -130,22 +153,25 @@ func _SMSServiceApi_GetOne_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SMSServiceApi_GetAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSMSRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _SMSServiceApi_GetAll_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetSMSRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(SMSServiceApiServer).GetAll(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/main.SMSServiceApi/getAll",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SMSServiceApiServer).GetAll(ctx, req.(*GetSMSRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(SMSServiceApiServer).GetAll(m, &sMSServiceApiGetAllServer{stream})
+}
+
+type SMSServiceApi_GetAllServer interface {
+	Send(*GetSMSResponse) error
+	grpc.ServerStream
+}
+
+type sMSServiceApiGetAllServer struct {
+	grpc.ServerStream
+}
+
+func (x *sMSServiceApiGetAllServer) Send(m *GetSMSResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // SMSServiceApi_ServiceDesc is the grpc.ServiceDesc for SMSServiceApi service.
@@ -163,11 +189,13 @@ var SMSServiceApi_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "getOne",
 			Handler:    _SMSServiceApi_GetOne_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "getAll",
-			Handler:    _SMSServiceApi_GetAll_Handler,
+			StreamName:    "getAll",
+			Handler:       _SMSServiceApi_GetAll_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "sms.proto",
 }

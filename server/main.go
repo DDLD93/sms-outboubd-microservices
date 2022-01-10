@@ -63,11 +63,25 @@ func (c *smsServiceApiServer) Get(ctx context.Context, req *smspb.GetSMSRequest)
 		TextBody:      message.TextBody}, nil
 }
 
-// func (c *smsServiceApiServer) GetAll(req *smspb.GetSMSRequest, stream *smspb.)  error{
-// 	id := req.Id
-// 	// send message by calling the send message route
+func (c *smsServiceApiServer) GetAll(req *smspb.GetSMSRequest, stream smspb.SMSServiceApi_GetAllServer) error {
 
-// }
+	// send message by calling the send message route
+	messages, err := dbInt.GetAllSMS()
+	if err != nil {
+		return err
+	}
+	for _, msg := range messages {
+		resp := &smspb.GetSMSResponse{
+			SenderPhone:   msg.SenderPhone,
+			ReceiverPhone: msg.ReceiverPhone,
+			TextSubject:   msg.TextSubject,
+			TextBody:      msg.TextBody,
+		}
+		stream.Send(resp)
+	}
+
+	return nil
+}
 
 func main() {
 

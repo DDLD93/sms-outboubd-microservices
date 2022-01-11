@@ -26,7 +26,7 @@ type ServiceApiServer struct {
 
 func init() {
 
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(".env")
 
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -101,7 +101,7 @@ func main() {
 
 	fmt.Println(port,"\n",host)
 
-	url := fmt.Sprintf("%s:%s", "0.0.0.0", "2400")
+	url := fmt.Sprintf("%s:%s", host, port)
 
 	// listner
 	listener, err := net.Listen("tcp", url)

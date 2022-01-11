@@ -8,7 +8,7 @@ RUN go mod download
 # Copy app files
 COPY . .
 # Build app
-RUN go build -o smsOutBound
+RUN go build -o app
 
 FROM alpine:3.14 as production
 
@@ -18,4 +18,4 @@ COPY --from=builder app .
 # Expose port
 EXPOSE 3333
 # Exec built binary
-CMD ./smsOutBound
+CMD ./app

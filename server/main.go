@@ -32,7 +32,7 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 }
-
+//commit changes
 var dbPort,_ = strconv.Atoi(os.Getenv("DBPORT"))
 var dbInt = routes.SMSRoute{SMSCtrl: controller.NewSMSCtrl("localhost", 1515)}
 

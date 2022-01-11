@@ -8,8 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	//"strconv"
-
 	"github.com/ddld93/sms-outboubd-microservices/gen/smspb"
 	"github.com/ddld93/sms-outboubd-microservices/server/controller"
 
@@ -20,7 +18,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-type smsServiceApiServer struct {
+type ServiceApiServer struct {
 	smspb.UnimplementedSMSServiceApiServer
 }
 
@@ -38,7 +36,7 @@ func init() {
 var dbPort,_ = strconv.Atoi(os.Getenv("DBPORT"))
 var dbInt = routes.SMSRoute{SMSCtrl: controller.NewSMSCtrl("localhost", 1515)}
 
-func (c *smsServiceApiServer) Send(ctx context.Context, req *smspb.SendSMSRequest) (*smspb.SendSMSResponse, error) {
+func (c *ServiceApiServer) Send(ctx context.Context, req *smspb.SendSMSRequest) (*smspb.SendSMSResponse, error) {
 
 	text := model.SmsOutbound{
 		SenderPhone:   req.SenderPhone,
@@ -57,7 +55,7 @@ func (c *smsServiceApiServer) Send(ctx context.Context, req *smspb.SendSMSReques
 	return &smspb.SendSMSResponse{Message: fmt.Sprintf("Message sent Successfully")}, nil
 }
 
-func (c *smsServiceApiServer) Get(ctx context.Context, req *smspb.GetSMSRequest) (*smspb.GetSMSResponse, error) {
+func (c *ServiceApiServer) GetOne(ctx context.Context, req *smspb.GetSMSRequest) (*smspb.GetSMSResponse, error) {
 	id := req.Id
 	// send message by calling the send message route
 	message, err := dbInt.GetSMS(id)
@@ -72,7 +70,7 @@ func (c *smsServiceApiServer) Get(ctx context.Context, req *smspb.GetSMSRequest)
 	}, nil
 }
 
-func (c *smsServiceApiServer) GetAll(req *smspb.GetSMSRequest, stream smspb.SMSServiceApi_GetAllServer) error {
+func (c *ServiceApiServer) GetAll(req *smspb.GetAllSMSRequest, stream smspb.SMSServiceApi_GetAllServer) error {
 
 	// send message by calling the send message route
 	messages, err := dbInt.GetAllSMS()
@@ -80,7 +78,7 @@ func (c *smsServiceApiServer) GetAll(req *smspb.GetSMSRequest, stream smspb.SMSS
 		return err
 	}
 	for _, msg := range messages {
-		resp := &smspb.GetSMSResponse{
+		resp := &smspb.GetAllSMSResponse{
 			SenderPhone:   msg.SenderPhone,
 			ReceiverPhone: msg.ReceiverPhone,
 			TextSubject:   msg.TextSubject,
@@ -103,7 +101,7 @@ func main() {
 
 	fmt.Println(port,"\n",host)
 
-	url := fmt.Sprintf("%s:%s", "0.0.0.0", "3333")
+	url := fmt.Sprintf("%s:%s", "0.0.0.0", "2400")
 
 	// listner
 	listener, err := net.Listen("tcp", url)
@@ -113,7 +111,8 @@ func main() {
 	//grpc server
 	grpcServer := grpc.NewServer()
 	//register Service
-	smspb.RegisterSMSServiceApiServer(grpcServer, &smsServiceApiServer{})
+	
+	smspb.RegisterSMSServiceApiServer(grpcServer, &ServiceApiServer{})
 	//serve
 	fmt.Printf("Grpc server listening on port %v!", port)
 	err = grpcServer.Serve(listener)

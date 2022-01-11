@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type SMSServiceApiClient interface {
 	Send(ctx context.Context, in *SendSMSRequest, opts ...grpc.CallOption) (*SendSMSResponse, error)
 	GetOne(ctx context.Context, in *GetSMSRequest, opts ...grpc.CallOption) (*GetSMSResponse, error)
-	GetAll(ctx context.Context, in *GetSMSRequest, opts ...grpc.CallOption) (SMSServiceApi_GetAllClient, error)
+	GetAll(ctx context.Context, in *GetAllSMSRequest, opts ...grpc.CallOption) (SMSServiceApi_GetAllClient, error)
 }
 
 type sMSServiceApiClient struct {
@@ -49,7 +49,7 @@ func (c *sMSServiceApiClient) GetOne(ctx context.Context, in *GetSMSRequest, opt
 	return out, nil
 }
 
-func (c *sMSServiceApiClient) GetAll(ctx context.Context, in *GetSMSRequest, opts ...grpc.CallOption) (SMSServiceApi_GetAllClient, error) {
+func (c *sMSServiceApiClient) GetAll(ctx context.Context, in *GetAllSMSRequest, opts ...grpc.CallOption) (SMSServiceApi_GetAllClient, error) {
 	stream, err := c.cc.NewStream(ctx, &SMSServiceApi_ServiceDesc.Streams[0], "/main.SMSServiceApi/getAll", opts...)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (c *sMSServiceApiClient) GetAll(ctx context.Context, in *GetSMSRequest, opt
 }
 
 type SMSServiceApi_GetAllClient interface {
-	Recv() (*GetSMSResponse, error)
+	Recv() (*GetAllSMSResponse, error)
 	grpc.ClientStream
 }
 
@@ -73,8 +73,8 @@ type sMSServiceApiGetAllClient struct {
 	grpc.ClientStream
 }
 
-func (x *sMSServiceApiGetAllClient) Recv() (*GetSMSResponse, error) {
-	m := new(GetSMSResponse)
+func (x *sMSServiceApiGetAllClient) Recv() (*GetAllSMSResponse, error) {
+	m := new(GetAllSMSResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (x *sMSServiceApiGetAllClient) Recv() (*GetSMSResponse, error) {
 type SMSServiceApiServer interface {
 	Send(context.Context, *SendSMSRequest) (*SendSMSResponse, error)
 	GetOne(context.Context, *GetSMSRequest) (*GetSMSResponse, error)
-	GetAll(*GetSMSRequest, SMSServiceApi_GetAllServer) error
+	GetAll(*GetAllSMSRequest, SMSServiceApi_GetAllServer) error
 	mustEmbedUnimplementedSMSServiceApiServer()
 }
 
@@ -101,7 +101,7 @@ func (UnimplementedSMSServiceApiServer) Send(context.Context, *SendSMSRequest) (
 func (UnimplementedSMSServiceApiServer) GetOne(context.Context, *GetSMSRequest) (*GetSMSResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOne not implemented")
 }
-func (UnimplementedSMSServiceApiServer) GetAll(*GetSMSRequest, SMSServiceApi_GetAllServer) error {
+func (UnimplementedSMSServiceApiServer) GetAll(*GetAllSMSRequest, SMSServiceApi_GetAllServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
 func (UnimplementedSMSServiceApiServer) mustEmbedUnimplementedSMSServiceApiServer() {}
@@ -154,7 +154,7 @@ func _SMSServiceApi_GetOne_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _SMSServiceApi_GetAll_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetSMSRequest)
+	m := new(GetAllSMSRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func _SMSServiceApi_GetAll_Handler(srv interface{}, stream grpc.ServerStream) er
 }
 
 type SMSServiceApi_GetAllServer interface {
-	Send(*GetSMSResponse) error
+	Send(*GetAllSMSResponse) error
 	grpc.ServerStream
 }
 
@@ -170,7 +170,7 @@ type sMSServiceApiGetAllServer struct {
 	grpc.ServerStream
 }
 
-func (x *sMSServiceApiGetAllServer) Send(m *GetSMSResponse) error {
+func (x *sMSServiceApiGetAllServer) Send(m *GetAllSMSResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 

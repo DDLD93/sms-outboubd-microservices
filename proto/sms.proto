@@ -5,7 +5,7 @@ option go_package="./smspb";
 service SMSServiceApi{
     rpc send(SendSMSRequest) returns (SendSMSResponse){}
     rpc getOne(GetSMSRequest) returns (GetSMSResponse){}
-    rpc getAll(GetSMSRequest) returns ( stream GetSMSResponse){}
+    rpc getAll(GetAllSMSRequest) returns ( stream GetAllSMSResponse){}
 }
 
 
@@ -23,6 +23,17 @@ message GetSMSRequest{
     string id = 1;
 }
 message GetSMSResponse{
+    string senderPhone = 1;
+    string receiverPhone = 2;
+    string textSubject = 3;
+    string textBody = 4;
+}
+
+message GetAllSMSRequest{
+    string message = 1;
+}
+
+message GetAllSMSResponse{
     string senderPhone = 1;
     string receiverPhone = 2;
     string textSubject = 3;

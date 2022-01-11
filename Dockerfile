@@ -6,9 +6,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy app files
-COPY /server .
-# Build app
 CMD cd /server
+COPY . .
+# Build app
 RUN go build -o smsOutBound
 
 FROM alpine:3.14 as production

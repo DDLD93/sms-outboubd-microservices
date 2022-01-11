@@ -4,8 +4,9 @@ WORKDIR /app
 # Cache and install dependencies
 COPY go.mod go.sum ./
 RUN go mod download
+
 # Copy app files
-COPY . .
+COPY /server .
 # Build app
 RUN go build -o smsOutBound
 

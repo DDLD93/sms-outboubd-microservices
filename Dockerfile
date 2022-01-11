@@ -12,7 +12,7 @@ RUN go build -o smsOutBound
 
 FROM alpine:3.14 as production
 
-WORKDIR /github.com/ddld93/sms-outboubd-microservices/server
+WORKDIR /github.com/ddld93/sms-outboubd-microservices/
 # Copy built binary from builder
 COPY --from=builder app .
 # Expose port

@@ -6,7 +6,6 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy app files
-CMD cd /server
 COPY . .
 # Build app
 RUN go build -o smsOutBound

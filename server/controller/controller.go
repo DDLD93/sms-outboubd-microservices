@@ -20,6 +20,7 @@ func NewSMSCtrl(host string, port int) *SMSCtrl {
 	if err != nil {
 		log.Fatal("Error connecting to mongo database", err)
 	}
+	//fmt.Printf("Database Listening on  %v\n", port)
 	return &SMSCtrl{Session: session}
 }
 func (s *SMSCtrl) Save(sms *model.SmsOutbound) error {

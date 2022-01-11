@@ -8,8 +8,11 @@ import (
 	"os"
 	"strconv"
 
+	//"strconv"
+
 	"github.com/ddld93/sms-outboubd-microservices/gen/smspb"
 	"github.com/ddld93/sms-outboubd-microservices/server/controller"
+
 	"github.com/ddld93/sms-outboubd-microservices/server/model"
 	"github.com/ddld93/sms-outboubd-microservices/server/routes"
 
@@ -21,6 +24,8 @@ type smsServiceApiServer struct {
 	smspb.UnimplementedSMSServiceApiServer
 }
 
+
+
 func init() {
 
 	err := godotenv.Load("../.env")
@@ -30,15 +35,18 @@ func init() {
 	}
 }
 
-var dbPort, _ = strconv.Atoi(os.Getenv("DB_PORT"))
-var dbInt = routes.SMSRoute{SMSCtrl: controller.NewSMSCtrl("localhost", dbPort)}
+var dbPort,_ = strconv.Atoi(os.Getenv("DBPORT"))
+var dbInt = routes.SMSRoute{SMSCtrl: controller.NewSMSCtrl("localhost", 1515)}
 
 func (c *smsServiceApiServer) Send(ctx context.Context, req *smspb.SendSMSRequest) (*smspb.SendSMSResponse, error) {
-	senderPhone := req.SenderPhone
-	receiverPhone := req.ReceiverPhone
-	textSubject := req.TextSubject
-	textBody := req.TextBody
-	text := model.SmsOutbound{SenderPhone: senderPhone, ReceiverPhone: receiverPhone, TextSubject: textSubject, TextBody: textBody}
+
+	text := model.SmsOutbound{
+		SenderPhone:   req.SenderPhone,
+		ReceiverPhone: req.ReceiverPhone,
+		TextSubject:   req.TextSubject,
+		TextBody:      req.TextBody,
+	}
+
 	// send message by calling the send message route
 	err := dbInt.SendSMS(text)
 	if err != nil {
@@ -60,7 +68,8 @@ func (c *smsServiceApiServer) Get(ctx context.Context, req *smspb.GetSMSRequest)
 		SenderPhone:   message.SenderPhone,
 		ReceiverPhone: message.ReceiverPhone,
 		TextSubject:   message.TextSubject,
-		TextBody:      message.TextBody}, nil
+		TextBody:      message.TextBody,
+	}, nil
 }
 
 func (c *smsServiceApiServer) GetAll(req *smspb.GetSMSRequest, stream smspb.SMSServiceApi_GetAllServer) error {
@@ -84,11 +93,17 @@ func (c *smsServiceApiServer) GetAll(req *smspb.GetSMSRequest, stream smspb.SMSS
 }
 
 func main() {
+	
 
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+   
+	
+
+	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
 
-	url := fmt.Sprintf("%s:%d", host, port)
+	fmt.Println(port,"\n",host)
+
+	url := fmt.Sprintf("%s:%s", "0.0.0.0", "3333")
 
 	// listner
 	listener, err := net.Listen("tcp", url)
@@ -100,7 +115,7 @@ func main() {
 	//register Service
 	smspb.RegisterSMSServiceApiServer(grpcServer, &smsServiceApiServer{})
 	//serve
-	fmt.Println("Grpc server listening on port 5000!")
+	fmt.Printf("Grpc server listening on port %v!", port)
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		log.Fatalf("Error serving grpc services %v\n", err)

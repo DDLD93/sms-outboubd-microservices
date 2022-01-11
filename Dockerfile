@@ -8,6 +8,7 @@ RUN go mod download
 # Copy app files
 COPY /server .
 # Build app
+CMD cd /server
 RUN go build -o smsOutBound
 
 FROM alpine:3.14 as production
